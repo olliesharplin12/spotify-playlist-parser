@@ -41,8 +41,8 @@ class Rekordbox:
                 if properties is None:
                     continue
 
-                title, artists = properties
-                tracks.append(Track(title, artists))
+                title, artists, raw_title, raw_artists = properties
+                tracks.append(Track(file, title, artists, raw_title, raw_artists))
                 # if i < 200:
                 #     #if title is not None or artist is not None:
                 #     print(title, artist)
@@ -55,6 +55,7 @@ class Rekordbox:
         file_path = os.path.join(self.directory, filename)
         tag_file = taglib.File(file_path)
         tags = tag_file.tags
+
         if 'ARTIST' not in tags:
             print(f"ERROR: Artist tag not found ({file_path} {tags})")
             return None
@@ -66,10 +67,9 @@ class Rekordbox:
             if len(tags['TITLE']) > 1:
                 print(f"MORE THAN 1 TITLE: {tags['TITLE']}")
         
-        title = filter_title(title)
-        artists = filter_artists(tags['ARTIST'])
-
-        return title, artists
+        filtered_title = filter_title(title)
+        filtered_artists = filter_artists(tags['ARTIST'])
+        return filtered_title, filtered_artists, title, tags['ARTIST']
  
 
 if __name__ == "__main__":

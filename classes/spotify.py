@@ -6,7 +6,7 @@ from .track import Track
 from config import CLIENT_ID, CLIENT_SECRET
 
 FETCH_LIMIT = 100
-PLAYLIST_FIELDS = "total,items(track(name,artists(name),album(name)))"
+PLAYLIST_FIELDS = "total,items(track(id,name,artists(name),album(name)))"
 
 class Spotify:
     _sp = None
@@ -63,7 +63,7 @@ class SpotifyPlaylist:
                 continue
             name = filter_name(track["track"]["name"])
             artists = [artist["name"] for artist in track["track"]["artists"]]
-            tracks.append(Track(name, artists))
+            tracks.append(Track(track["track"]["id"], name, artists, track["track"]["name"], artists))
         return tracks
 
 
