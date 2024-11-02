@@ -1,11 +1,12 @@
 import spotipy
 import spotipy.oauth2 as oauth2
+import sys
 
 from .track import Track
 from config import CLIENT_ID, CLIENT_SECRET
 
-FETCH_LIMIT = 50
-PLAYLIST_FIELDS = "total,items(track(name,artists(name)))"
+FETCH_LIMIT = 100
+PLAYLIST_FIELDS = "total,items(track(name,artists(name),album(name)))"
 
 class Spotify:
     _sp = None
@@ -26,6 +27,18 @@ class Spotify:
             redirect_uri="http://localhost:3000")
         return spotipy.Spotify(auth_manager=oauth)
 
+def is_valid_track(track_json):
+    if (track_json["track"]["artists"][0]["name"] == "" and track_json["track"]["album"]["name"] == "") \
+        or track_json["track"]["album"]["name"] == "Sheriff's Mixes":
+            return False
+    return True
+
+def filter_name(name):
+        filters = ["-", "("]
+        for filter in filters:
+            if filter in name:
+                name = name.split(filter)[0]
+        return name.strip()
 
 class SpotifyPlaylist:
     def __init__(self, playlist_uri):
@@ -44,7 +57,14 @@ class SpotifyPlaylist:
                 offset += len(response['items'])
                 print(offset)
         
-        return [Track(track["track"]["name"], [artist["name"] for artist in track["track"]["artists"]]) for track in tracks_json]
+        tracks = []
+        for track in tracks_json:
+            if not is_valid_track(track):
+                continue
+            name = filter_name(track["track"]["name"])
+            artists = [artist["name"] for artist in track["track"]["artists"]]
+            tracks.append(Track(name, artists))
+        return tracks
 
 
 if __name__ == "__main__":

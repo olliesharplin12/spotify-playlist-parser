@@ -1,5 +1,15 @@
 from typing import List
 
+AMPERSAND = " & "
+
+def joined_artist_match(artists_a, artists_b):
+    for artist in artists_a:
+        if AMPERSAND in artist:
+            artists = artist.split(AMPERSAND)
+            if all([artist.strip() in artists_b for artist in artists]):
+                return True
+    return False
+
 class Track:
     def __init__(self, name: str, artists: List[str]):
         self.name = name
@@ -9,9 +19,13 @@ class Track:
         def artist_overlap(artists_a: List[str], artists_b: List[str]) -> bool:
             a_lower = [artist.lower() for artist in artists_a]
             b_lower = [artist.lower() for artist in artists_b]
-            return any([artist for artist in a_lower if artist in b_lower])
-
+            return any([artist in b_lower for artist in a_lower]) \
+                or joined_artist_match(a_lower, b_lower) \
+                or joined_artist_match(b_lower, a_lower)
         return isinstance(obj, Track) and self.name.lower() == obj.name.lower() and artist_overlap(self.artists, obj.artists)
 
     def __str__(self):
         return ", ".join(self.artists) + " - " + self.name
+
+    def __lt__(self, other):
+        return self.artists[0] < other.artists[0]
